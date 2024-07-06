@@ -12,23 +12,30 @@ const Direction = {
   LEFT: "LEFT",
 };
 
-let intervalId: number | undefined;
-
 const Board: React.FC<Props> = ({ size }) => {
   const [board, setBoard] = useState(initBoard(size));
-  const [snakeCells, setSnakeCells] = useState([1, 2, 3, 4, 5]);
-  const [foodCell, setFoodCell] = useState(size * size - 2);
+  const [snakeCells, setSnakeCells] = useState([1, 2, 3]);
+  const [foodCell, setFoodCell] = useState(generateRandomFoodPosition(size, snakeCells));
   const [direction, setDirection] = useState(Direction.RIGHT);
   const [score, setScore] = useState(0);
   const [gameOver, setGameOver] = useState(false);
+  const [isLose, setIsLose] = useState(false);
+  const [isWin, setIsWin] = useState(false);
+  let intervalId: number | undefined;
 
   useEffect(() => {
     intervalId = setInterval(() => {
       moveSnake();
-    }, 300);
+    }, 500);
     return () => clearInterval(intervalId);
   }, [snakeCells]);
 
+  useEffect(() => {
+    handlePlayAgain();
+  }, [size]);
+  useEffect(() => {
+    setBoard(initBoard(size));
+  }, [size]);
   const handleKeydown = (e: KeyboardEvent) => {
     if (!gameOver) {
       switch (e.key) {
@@ -56,35 +63,73 @@ const Board: React.FC<Props> = ({ size }) => {
   const moveSnake = () => {
     const currentHeadPotision = snakeCells[snakeCells.length - 1];
 
-    const nextHeadPosition = getCoordsInDirection(size, currentHeadPotision, direction);
+    const nextHeadPosition = getNextHeadPosition(size, currentHeadPotision, direction);
 
     if (isOutOfBounds(currentHeadPotision, nextHeadPosition, size)) {
       setGameOver(true);
-      handleGameOver();
+      setIsLose(true);
       return;
     }
     if (snakeCells.includes(nextHeadPosition)) {
       setGameOver(true);
-      handleGameOver();
+      setIsLose(true);
       return;
     }
 
     const newSnakeCells = [...snakeCells];
     newSnakeCells.push(nextHeadPosition);
-    newSnakeCells.shift();
 
-    setSnakeCells(newSnakeCells);
+    const foodConsumed = nextHeadPosition === foodCell;
+    if (!foodConsumed) {
+      newSnakeCells.shift();
+      setSnakeCells(newSnakeCells);
+    } else {
+      handleFoodConsumption(newSnakeCells);
+    }
   };
 
-  const handleGameOver = () => {
-    clearInterval(intervalId);
+  const handleFoodConsumption = (newSnakeCells: number[]) => {
+    setScore(score + 1);
+    if (newSnakeCells.length == size * size) {
+      setIsWin(true);
+      setGameOver(true);
+      return;
+    }
+    setSnakeCells(newSnakeCells);
+
+    let nextFoodPosition = generateRandomFoodPosition(size, newSnakeCells);
+    setFoodCell(nextFoodPosition);
+  };
+
+  const handlePlayAgain = () => {
+    setIsLose(false);
+    setIsWin(false);
+    setGameOver(false);
     setScore(0);
-    alert("YOU LOSE");
+    setSnakeCells([1, 2, 3]);
+    setFoodCell(generateRandomFoodPosition(size, snakeCells));
+    setDirection(Direction.RIGHT);
   };
 
   return (
     <>
-      <h1>Score: {score}</h1>
+      <h1>Your Score: {score}</h1>
+      {isLose && (
+        <div>
+          <h3>You Lose!!</h3>
+          <button onClick={handlePlayAgain} style={{ marginBottom: "10px" }}>
+            Play Again
+          </button>
+        </div>
+      )}
+      {isWin && (
+        <div>
+          <h3>You Win!!</h3>
+          <button onClick={handlePlayAgain} style={{ marginBottom: "10px" }}>
+            Play Again
+          </button>
+        </div>
+      )}
       <div className="board">
         {board.map((row, rowIdx) => (
           <div key={rowIdx} className="row">
@@ -121,7 +166,7 @@ const getCellClassName = (cellValue: number, foodCell: number, snakeCells: numbe
   return className;
 };
 
-const getCoordsInDirection = (size: number, position: number, direction: string) => {
+const getNextHeadPosition = (size: number, position: number, direction: string) => {
   if (direction === Direction.UP) {
     return position - size;
   }
@@ -144,6 +189,18 @@ const isOutOfBounds = (currentPosition: number, nextPostion: number, size: numbe
     (currentPosition % size == 0 && nextPostion % size == 1) ||
     (currentPosition % size == 1 && nextPostion % size == 0)
   );
+};
+
+const generateRandomFoodPosition = (size: number, newSnakeCells: number[]) => {
+  let randomFoodPosition;
+  while (true) {
+    randomFoodPosition = Math.floor(Math.random() * size * size + 1);
+    if (newSnakeCells.includes(randomFoodPosition)) {
+      continue;
+    }
+    break;
+  }
+  return randomFoodPosition;
 };
 
 export default Board;
