@@ -7,7 +7,6 @@ const Game: React.FC = () => {
   return (
     <div>
       <h1>SNAKE GAME</h1>
-
       <Board size={inputSize}></Board>
     </div>
   );
