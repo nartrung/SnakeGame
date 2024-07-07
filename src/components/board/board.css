@@ -1,12 +1,13 @@
 .row {
-  height: 40px;
+  height: 35px;
 }
 
 .cell {
-  width: 40px;
-  height: 40px;
-  outline: 1px solid rgb(0, 0, 0);
+  width: 35px;
+  height: 35px;
+  background-color: #293447;
   display: inline-block;
+  outline: 0.1px solid rgba(255, 255, 255, 0.3);
 }
 
 .cell-green {
@@ -15,8 +16,4 @@
 
 .cell-red {
   background-color: red;
-}
-
-.cell-purple {
-  background-color: purple;
 }
