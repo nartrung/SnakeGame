@@ -1,16 +1,16 @@
 import React, { useEffect, useState } from "react";
 import "./board.css";
+import Direction, {
+  generateRandomFoodPosition,
+  getCellClassName,
+  getNextHeadPosition,
+  initBoard,
+  isOutOfBounds,
+} from "../utils/utils";
 
 interface Props {
   size: number;
 }
-
-const Direction = {
-  UP: "UP",
-  RIGHT: "RIGHT",
-  DOWN: "DOWN",
-  LEFT: "LEFT",
-};
 
 const Board: React.FC<Props> = ({ size }) => {
   const [board, setBoard] = useState(initBoard(size));
@@ -23,6 +23,7 @@ const Board: React.FC<Props> = ({ size }) => {
   const [isWin, setIsWin] = useState(false);
   let intervalId: number | undefined;
 
+  // Handle the movement of the snake, call the moveSnake function every 500 milliseconds.
   useEffect(() => {
     intervalId = setInterval(() => {
       moveSnake();
@@ -30,12 +31,15 @@ const Board: React.FC<Props> = ({ size }) => {
     return () => clearInterval(intervalId);
   }, [snakeCells]);
 
+  // Handle the resetting of the game when the size prop changes.
   useEffect(() => {
     handlePlayAgain();
   }, [size]);
   useEffect(() => {
     setBoard(initBoard(size));
   }, [size]);
+
+  // Updates the direction state based on the key pressed, but only if the game is not over.
   const handleKeydown = (e: KeyboardEvent) => {
     if (!gameOver) {
       switch (e.key) {
@@ -60,6 +64,7 @@ const Board: React.FC<Props> = ({ size }) => {
     return () => document.removeEventListener("keydown", handleKeydown);
   }, [direction]);
 
+  // Handle the movement of the snake.
   const moveSnake = () => {
     const currentHeadPotision = snakeCells[snakeCells.length - 1];
 
@@ -88,6 +93,7 @@ const Board: React.FC<Props> = ({ size }) => {
     }
   };
 
+  // Function to handle the consumption of food by the snake.
   const handleFoodConsumption = (newSnakeCells: number[]) => {
     setScore(score + 1);
     if (newSnakeCells.length == size * size) {
@@ -101,6 +107,7 @@ const Board: React.FC<Props> = ({ size }) => {
     setFoodCell(nextFoodPosition);
   };
 
+  // Function to reset the game.
   const handlePlayAgain = () => {
     setIsLose(false);
     setIsWin(false);
@@ -142,65 +149,6 @@ const Board: React.FC<Props> = ({ size }) => {
       </div>
     </>
   );
-};
-
-const initBoard = (size: number) => {
-  let cnt = 1;
-  const board = [];
-  for (let row = 0; row < size; row++) {
-    const currentRow = [];
-    for (let col = 0; col < size; col++) {
-      currentRow.push(cnt++);
-    }
-    board.push(currentRow);
-  }
-  return board;
-};
-
-const getCellClassName = (cellValue: number, foodCell: number, snakeCells: number[]) => {
-  let className = "cell";
-  if (cellValue === foodCell) {
-    className = "cell cell-red";
-  }
-  if (snakeCells.includes(cellValue)) className = "cell cell-green";
-  return className;
-};
-
-const getNextHeadPosition = (size: number, position: number, direction: string) => {
-  if (direction === Direction.UP) {
-    return position - size;
-  }
-  if (direction === Direction.RIGHT) {
-    return position + 1;
-  }
-  if (direction === Direction.DOWN) {
-    return position + size;
-  }
-  if (direction === Direction.LEFT) {
-    return position - 1;
-  }
-  return -1;
-};
-
-const isOutOfBounds = (currentPosition: number, nextPostion: number, size: number) => {
-  return (
-    nextPostion < 1 ||
-    nextPostion > size * size ||
-    (currentPosition % size == 0 && nextPostion % size == 1) ||
-    (currentPosition % size == 1 && nextPostion % size == 0)
-  );
-};
-
-const generateRandomFoodPosition = (size: number, newSnakeCells: number[]) => {
-  let randomFoodPosition;
-  while (true) {
-    randomFoodPosition = Math.floor(Math.random() * size * size + 1);
-    if (newSnakeCells.includes(randomFoodPosition)) {
-      continue;
-    }
-    break;
-  }
-  return randomFoodPosition;
 };
 
 export default Board;

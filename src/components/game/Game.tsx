@@ -8,12 +8,15 @@ const Game: React.FC = () => {
   return (
     <div>
       <h1>SNAKE GAME</h1>
-      <h2>Please select size for the maxtrix</h2>
+      <h2>Please select size for the maxtrix (4 - 20) </h2>
 
       <input
         type="number"
         min={4}
         max={20}
+        onKeyUp={() => {
+          if (inputSize > 20) setInputSize(20);
+        }}
         value={inputSize}
         onChange={(e) => setInputSize(parseInt(e.target.value))}
       />
