@@ -27,7 +27,7 @@ const Board: React.FC<Props> = ({ size }) => {
   useEffect(() => {
     intervalId = setInterval(() => {
       moveSnake();
-    }, 500);
+    }, 1000);
     return () => clearInterval(intervalId);
   }, [snakeCells]);
 
