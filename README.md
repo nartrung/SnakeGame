@@ -1,5 +1,5 @@
 
-# [HOME_TECH] - SNAKE GAME
+# [TAKE HOME PROJECT] - SNAKE GAME
 
 A basic snake game.
 
